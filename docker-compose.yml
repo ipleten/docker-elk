@@ -10,6 +10,9 @@ services:
     ports:
       - "9200:9200"
       - "9300:9300"
+    volumes:
+      # Persist data on disk
+      - /home/tamerlan/docker/elk/elasticsearch/:/usr/share/elasticsearch/data
     environment:
       ES_JAVA_OPTS: "-Xmx256m -Xms256m"
     networks:
@@ -23,6 +26,7 @@ services:
       - ./logstash/pipeline:/usr/share/logstash/pipeline:ro
     ports:
       - "5000:5000"
+      - "5044:5044"
     environment:
       LS_JAVA_OPTS: "-Xmx256m -Xms256m"
     networks:
@@ -42,7 +46,21 @@ services:
     depends_on:
       - elasticsearch
 
-networks:
+  filebeat:
+    build:
+        context: filebeat/
+    volumes:
+        - ./filebeat/config/filebeat.yml:/usr/share/filebeat/filebeat.yml
+        # Logs are on host machine not in docker
+        # TODO: move nginx to docker!
+        - /var/log/nginx/:/var/log/nginx/:ro
+        - /var/log/named/:/var/log/named/:ro
+    networks:
+        - elk
+    depends_on:
+        - kibana
+        - logstash
 
+networks:
   elk:
     driver: bridge

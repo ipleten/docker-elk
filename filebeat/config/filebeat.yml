@@ -1,0 +1,11 @@
+filebeat.prospectors:
+- type: log
+  enabled: true
+  paths:
+    - /var/log/named/bind.log
+    #- c:\programdata\elasticsearch\logs\*
+setup.kibana:
+  host: "kibana:5601"
+
+output.logstash:
+  hosts: ["logstash:5044"]
